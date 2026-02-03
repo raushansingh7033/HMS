@@ -78,4 +78,44 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         return prescriptionDetails;
     }
+
+    @Override
+    public List<PrescriptionDetails> getAllPrescriptions() throws HmsException {
+        List<Prescription> prescriptions=(List<Prescription>) prescriptionRepository.findAll();
+        List<PrescriptionDetails> prescriptionDetails = prescriptions.stream()
+                .map(Prescription::toDetails)
+                .toList();
+        List<Long> doctorsIds = prescriptionDetails.stream()
+                .map(PrescriptionDetails::getDoctorId)
+                .distinct()
+                .toList();
+        List<Long> patientIds=prescriptionDetails.stream()
+                .map(PrescriptionDetails::getPatientId)
+                .distinct()
+                .toList();
+        List<DoctorName> doctorNames = profileClient.getDoctorsById(doctorsIds);
+        List<DoctorName> patientNames=profileClient.getPatientsById(patientIds);
+        Map<Long, String> doctorMap = doctorNames.stream()
+                .collect(Collectors.toMap(DoctorName::getId, DoctorName::getName));
+        Map<Long,String> patientMap=patientNames.stream()
+                .collect(Collectors.toMap(DoctorName::getId, DoctorName::getName));
+
+        prescriptionDetails.forEach(detais -> {
+            String patientName = patientMap.get(detais.getPatientId());
+            String doctorName = doctorMap.get(detais.getDoctorId());
+            if (doctorName != null) {
+                detais.setDoctorName(doctorName);
+            } else {
+                detais.setDoctorName("Unknown Doctor");
+            }
+            if (patientName != null) {
+                detais.setPatientName(patientName);
+
+            }else  {
+                detais.setPatientName("Unknown Patient");
+            }
+
+        });
+        return prescriptionDetails;
+    }
 }

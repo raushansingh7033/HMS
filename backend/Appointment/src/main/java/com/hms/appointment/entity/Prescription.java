@@ -20,6 +20,7 @@ public class Prescription {
     private Long id;
     private Long patientId;
     private Long doctorId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="appointment_id")
     private Appointment appointment;
@@ -35,7 +36,7 @@ public class Prescription {
     }
 
     public PrescriptionDetails toDetails (){
-        return  new PrescriptionDetails(id, patientId, doctorId, null, appointment.getId(), prescriptionDate, notes, null);
+        return  new PrescriptionDetails(id, patientId, doctorId, null,null, appointment.getId(), prescriptionDate, notes, null);
     }
 
 }

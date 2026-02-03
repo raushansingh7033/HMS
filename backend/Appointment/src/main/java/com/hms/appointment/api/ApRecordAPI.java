@@ -65,4 +65,9 @@ public class ApRecordAPI {
         return new ResponseEntity<>(prescriptionService.getPrescriptionsByPatientId(patientId), HttpStatus.OK);
     }
 
+    @GetMapping("getAllPrescriptions")
+    public ResponseEntity<List<PrescriptionDetails>> getAllPrescriptions() throws HmsException {
+        return new ResponseEntity<>(prescriptionService.getAllPrescriptions(),HttpStatus.OK);
+    }
+
 }
