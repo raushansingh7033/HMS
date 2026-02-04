@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Card,
-  Divider,
   Fieldset,
   Group,
   LoadingOverlay,
@@ -15,11 +14,12 @@ import {
   TextInput,
   type SelectProps,
 } from "@mantine/core";
-import { medicineCategories } from "../../../data/DropdownData";
+import { freqMap, medicineCategories } from "../../../data/DropdownData";
 import {
   IconCheck,
   IconEdit,
   IconEye,
+  IconHome,
   IconPlus,
   IconSearch,
   IconTrash,
@@ -48,9 +48,18 @@ import {
   getAllSaleItems,
   getAllSales,
 } from "../../../Service/SalesService";
+import {
+  Spotlight,
+  type SpotlightActionData,
+  spotlight,
+} from "@mantine/spotlight";
 import React from "react";
 import { useDisclosure } from "@mantine/hooks";
 
+import {
+  getAllPrescriptions,
+  getMedicineByPrescriptionId,
+} from "../../../Service/AppointmentService";
 interface SaleItem {
   medicineId: string;
   quantity: number;
@@ -81,6 +90,7 @@ const Sales = () => {
   const [medicineMap, setMedicineMap] = useState<Record<string, any>>({});
   const [opened, { open, close }] = useDisclosure(false);
   const [saleItems, setSaleItems] = useState<any[]>([]);
+  const [actions, setActions] = useState<SpotlightActionData[]>([]);
   // as array
   const form = useForm({
     initialValues: {
@@ -111,8 +121,66 @@ const Sales = () => {
       .catch((err) => {
         console.error("error fetching reports: ", err);
       });
+    getAllPrescriptions()
+      .then((res) => {
+        setActions(
+          res.map((prescription: any) => ({
+            id: prescription.id,
+            label: prescription.patientName,
+            description: `Prescribed by Dr. ${prescription.doctorName} on ${formatDate(prescription.prescriptionDate)}`,
+            onClick: () => handleImport(prescription),
+          })),
+        );
+      })
+      .catch((err) => {
+        console.error("Error fetching prescriptions: ", err);
+      });
+
     fetchData();
   }, []);
+
+  const handleImport = (prescription: any) => {
+    setLoading(true);
+
+    getMedicineByPrescriptionId(prescription.id)
+      .then((res) => {
+        setSaleItems(res);
+        console.log(res);
+        form.setValues({
+          buyerName: prescription.patientName,
+          saleItems: res
+            .filter((medicine: any) => medicine.Id != null)
+            .map((medicine: any) => ({
+              medicineId: String(medicine.medicineId),
+              quantity: calculateQuantity(
+                medicine.frequency,
+                medicine.duration,
+              ),
+            })),
+        });
+      })
+      .catch((err) => {
+        console.error("Error fetching medicines by prescription id: ", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const calculateQuantity = (freq: string, duration: number) => {
+    const freqValue = freqMap[freq] || 0;
+    return Math.ceil(duration * freqValue);
+  };
+
+  // const actions: SpotlightActionData[] = [
+  //   {
+  //     id: "home",
+  //     label: "Home",
+  //     description: "Get to home page",
+  //     onClick: () => console.log("Home"),
+  //     leftSection: <IconHome size={24} stroke={1.5} />,
+  //   },
+  // ];
 
   const fetchData = () => {
     getAllSales()
@@ -150,8 +218,25 @@ const Sales = () => {
         setLoading(false);
       });
   };
+  const handleSpotLight = () => {
+    spotlight.open();
+  };
   const handleSubmit = (values: typeof form.values) => {
     let update = false;
+    let flag = false;
+    values.saleItems.forEach((item: any, index: number) => {
+      if (item.quantity > (medicineMap[item.medicineId]?.stock || 0)) {
+        flag = true;
+        form.setFieldError(
+          `saleItems.${index}.quantity`,
+          "Quantity exceeds available stock",
+        );
+      }
+    });
+    if (flag) {
+      errorNotification("Quantity exceeds available stock");
+      return;
+    }
     const saleItems = values.saleItems.map((x: any) => ({
       ...x,
       unitPrice: medicineMap[x.medicineId]?.unitPrice,
@@ -217,6 +302,7 @@ const Sales = () => {
     setEdit(false);
   };
 
+  //
   const addMore = () => {
     form.insertListItem("saleItems", { medicineId: "", quantity: 0 });
   };
@@ -248,6 +334,7 @@ const Sales = () => {
       </Badge>
     );
   };
+
   return (
     <div>
       {!edit ? (
@@ -286,137 +373,151 @@ const Sales = () => {
           />
         </DataTable>
       ) : (
-        <form onSubmit={form.onSubmit(handleSubmit)} className="grid gap-5">
-          <LoadingOverlay visible={loading} />
-          <Fieldset
-            className="grid gap-5"
-            legend={
-              <span className="text-lg font-medium text-primary-500">
-                Buyer information
-              </span>
-            }
-            radius="md"
-          >
-            <div className="grid gap-2 grid-cols-2">
-              <TextInput
-                withAsterisk
-                label="Buyer Name"
-                placeholder="Enter Buyer name"
-                {...form.getInputProps("buyerName")}
-              />
-              <NumberInput
-                maxLength={10}
-                withAsterisk
-                label="Contact Number"
-                placeholder="Enter Buyer contact"
-                {...form.getInputProps("buyerContact")}
-              />
-            </div>
-          </Fieldset>
-          <Fieldset
-            className="grid gap-5"
-            legend={
-              <span className="text-lg font-medium text-primary-500">
-                Medicine information
-              </span>
-            }
-            radius="md"
-          >
-            <div className="grid gap-4 grid-cols-5">
-              {form.values.saleItems.map((item, index) => (
-                <React.Fragment key={index}>
-                  <div className="col-span-2">
-                    <Select
-                      renderOption={renderSelectOption}
-                      {...form.getInputProps(`saleItems.${index}.medicineId`)}
-                      label="Medicine"
-                      placeholder="Select Medicine"
-                      data={medicine
-                        .filter(
-                          (x) =>
-                            !form.values.saleItems.some(
-                              (item1: any, idx) =>
-                                item1.medicineId == x.id && idx != index,
-                            ),
-                        )
-                        .map((item) => ({
-                          ...item,
-                          value: "" + item.id,
-                          label: item.name,
-                        }))}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <NumberInput
-                      rightSectionWidth={80}
-                      rightSection={
-                        <div className="text-xs flex gap-1 text-white font-medium rounded-md bg-red-400 p-1">
-                          Stock: {medicineMap[item.medicineId]?.stock}{" "}
-                        </div>
-                      }
-                      {...form.getInputProps(`saleItems.${index}.quantity`)}
-                      min={0}
-                      max={medicineMap[item.medicineId]?.stock || 0}
-                      clampBehavior="strict"
-                      label="Quantity"
-                      placeholder="Enter quantity"
-                      withAsterisk
-                    />
-                  </div>
-                  <div className="flex items-end justify-between">
-                    {item.quantity && item.medicineId ? (
-                      <div>
-                        Quantity {item.quantity} X{" "}
-                        {medicineMap[item.medicineId]?.unitPrice} ={" "}
-                        {item.quantity *
-                          medicineMap[item.medicineId]?.unitPrice}{" "}
-                      </div>
-                    ) : (
-                      <div></div>
-                    )}
-                    <ActionIcon
-                      size={"lg"}
-                      color="red"
-                      onClick={() => form.removeListItem("saleItems", index)}
-                    >
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </div>
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-center">
-              <Button
-                onClick={addMore}
-                variant="outline"
-                leftSection={<IconPlus size={16} />}
-              >
-                Add more{" "}
-              </Button>
-            </div>
-          </Fieldset>
-
-          <div className="flex item-center gap-5 justify-center">
-            <Button
-              loading={loading}
-              type="submit"
-              className="w-full"
-              variant="filled"
-              color="primary"
-            >
+        <div>
+          <div className="mb-5 flex items-center justify-between ">
+            <h3 className="text-xl text-primary-500 font-medium">
               Sell Medicine
-            </Button>
+            </h3>
             <Button
-              loading={loading}
-              onClick={cancel}
               variant="filled"
-              color="red"
+              leftSection={<IconPlus />}
+              onClick={handleSpotLight}
             >
-              Cancel
+              import prescriptions
             </Button>
           </div>
-        </form>
+          <form onSubmit={form.onSubmit(handleSubmit)} className="grid gap-5">
+            <LoadingOverlay visible={loading} />
+            <Fieldset
+              className="grid gap-5"
+              legend={
+                <span className="text-lg font-medium text-primary-500">
+                  Buyer information
+                </span>
+              }
+              radius="md"
+            >
+              <div className="grid gap-2 grid-cols-2">
+                <TextInput
+                  withAsterisk
+                  label="Buyer Name"
+                  placeholder="Enter Buyer name"
+                  {...form.getInputProps("buyerName")}
+                />
+                <NumberInput
+                  maxLength={10}
+                  withAsterisk
+                  label="Contact Number"
+                  placeholder="Enter Buyer contact"
+                  {...form.getInputProps("buyerContact")}
+                />
+              </div>
+            </Fieldset>
+            <Fieldset
+              className="grid gap-5"
+              legend={
+                <span className="text-lg font-medium text-primary-500">
+                  Medicine information
+                </span>
+              }
+              radius="md"
+            >
+              <div className="grid gap-4 grid-cols-5">
+                {form.values.saleItems.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <div className="col-span-2">
+                      <Select
+                        renderOption={renderSelectOption}
+                        {...form.getInputProps(`saleItems.${index}.medicineId`)}
+                        label="Medicine"
+                        placeholder="Select Medicine"
+                        data={medicine
+                          .filter(
+                            (x) =>
+                              !form.values.saleItems.some(
+                                (item1: any, idx) =>
+                                  item1.medicineId == x.id && idx != index,
+                              ),
+                          )
+                          .map((item) => ({
+                            ...item,
+                            value: "" + item.id,
+                            label: item.name,
+                          }))}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <NumberInput
+                        rightSectionWidth={80}
+                        rightSection={
+                          <div className="text-xs flex gap-1 text-white font-medium rounded-md bg-red-400 p-1">
+                            Stock: {medicineMap[item.medicineId]?.stock}{" "}
+                          </div>
+                        }
+                        {...form.getInputProps(`saleItems.${index}.quantity`)}
+                        min={0}
+                        max={medicineMap[item.medicineId]?.stock || 0}
+                        clampBehavior="strict"
+                        label="Quantity"
+                        placeholder="Enter quantity"
+                        withAsterisk
+                      />
+                    </div>
+                    <div className="flex items-end justify-between">
+                      {item.quantity && item.medicineId ? (
+                        <div>
+                          Quantity {item.quantity} X{" "}
+                          {medicineMap[item.medicineId]?.unitPrice} ={" "}
+                          {item.quantity *
+                            medicineMap[item.medicineId]?.unitPrice}{" "}
+                        </div>
+                      ) : (
+                        <div></div>
+                      )}
+                      <ActionIcon
+                        size={"lg"}
+                        color="red"
+                        onClick={() => form.removeListItem("saleItems", index)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-center">
+                <Button
+                  onClick={addMore}
+                  variant="outline"
+                  leftSection={<IconPlus size={16} />}
+                >
+                  Add more{" "}
+                </Button>
+              </div>
+            </Fieldset>
+
+            <div className="flex item-center gap-5 justify-center">
+              <Button
+                loading={loading}
+                type="submit"
+                className="w-full"
+                variant="filled"
+                color="primary"
+              >
+                Sell Medicine
+              </Button>
+              <Button
+                loading={loading}
+                onClick={cancel}
+                variant="filled"
+                color="red"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </div>
       )}
       <Modal
         opened={opened}
@@ -470,7 +571,7 @@ const Sales = () => {
                     <Text size="sm">
                       {medicine.quantity * medicine.unitPrice}
                     </Text>
-                  </Group>  
+                  </Group>
                 </Stack>
               </Card>
             );
@@ -483,6 +584,15 @@ const Sales = () => {
           </Text>
         )}
       </Modal>
+      <Spotlight
+        actions={actions}
+        nothingFound="Nothing found..."
+        highlightQuery
+        searchProps={{
+          leftSection: <IconSearch size={20} stroke={1.5} />,
+          placeholder: "Search...",
+        }}
+      />
     </div>
   );
 };

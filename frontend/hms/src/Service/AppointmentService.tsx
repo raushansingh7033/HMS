@@ -100,6 +100,15 @@ const getAllPrescriptions = async () => {
       throw error;
     });
 };
+const getMedicineByPrescriptionId = async (prescriptionId: any) => {
+  return axiosInstance
+    .get(`/appointment/report/getMedicinesByPrescriptionId/${prescriptionId}`)
+    .then((response: any) => response.data)
+    .catch((error) => {
+      throw error;
+    });
+};
+
 export {
   scheduleAppointment,
   cancelAppointment,
@@ -111,4 +120,6 @@ export {
   isReportExists,
   getReportsByPatientId,
   getPrescriptionsByPatientId,
+  getAllPrescriptions,
+  getMedicineByPrescriptionId,
 };

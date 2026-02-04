@@ -1,5 +1,6 @@
 package com.hms.user.UserMS.service;
 
+import com.hms.user.UserMS.client.Profile;
 import com.hms.user.UserMS.dto.UserDTO;
 import com.hms.user.UserMS.exception.HmsException;
 
@@ -9,4 +10,5 @@ public interface UserService {
     public UserDTO getByUserId(Long id) throws HmsException;
     public void updateUser(UserDTO userDTO);
     public UserDTO getUser(String email) throws HmsException;
+    public Long getProfilePicture(Long id) throws HmsException;
 }

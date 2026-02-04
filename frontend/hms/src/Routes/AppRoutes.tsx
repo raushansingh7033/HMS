@@ -1,5 +1,5 @@
 import Random from "../Components/Random";
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AdminDashboard from "../Layout/AdminDashboard";
 import LoginPage from "../Pages/LoginPage";
 import RegisterPage from "../Pages/RegisterPage";
@@ -16,43 +16,81 @@ import AdminMedicinePage from "../Pages/Admin/AdminMedicinePage";
 import NotFoundPage from "../Pages/Patient/NotFoundPage";
 import AdminInventoryPage from "../Pages/Admin/AdminInventoryPage";
 import AdminSalesPage from "../Pages/Admin/AdminSalesPage";
+import AdminPatientPage from "../Pages/Admin/AdminPatientPage";
+import AdminDoctorPage from "../Pages/Admin/AdminDoctorPage";
+import AdminDashBoardPage from "../Pages/Admin/AdminDashBoardPage";
 
 const AppRoutes = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-                <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-                <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} >
-                    <Route path="dashboard" element={<Random />} />
-                    <Route path="medicine" element={<AdminMedicinePage />} />
-                    <Route path="inventory" element={<AdminInventoryPage />} />
-                    <Route path="sales" element={<AdminSalesPage />} />
-                    <Route path="patients" element={<Random />} />
-                    <Route path="doctors" element={<Random />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashBoardPage />} />
+          <Route path="medicine" element={<AdminMedicinePage />} />
+          <Route path="inventory" element={<AdminInventoryPage />} />
+          <Route path="sales" element={<AdminSalesPage />} />
+          <Route path="patients" element={<AdminPatientPage />} />
+          <Route path="doctors" element={<AdminDoctorPage />} />
+        </Route>
+        <Route
+          path="/doctor"
+          element={
+            <ProtectedRoute>
+              <DoctorDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<Random />} />
+          <Route path="profile" element={<DoctorProfilePage />} />
+          <Route path="pharmacy" element={<Random />} />
+          <Route path="appointments" element={<DoctorAppointmentPage />} />
+          <Route
+            path="appointments/:id"
+            element={<DoctorAppointmentDetailsPage />}
+          />
+          <Route path="patients" element={<Random />} />
+          <Route path="doctors" element={<Random />} />
+        </Route>
 
-                </Route>
-                <Route path="/doctor" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} >
-                    <Route path="dashboard" element={<Random />} />
-                    <Route path="profile" element={<DoctorProfilePage />} />
-                    <Route path="pharmacy" element={<Random />} />
-                    <Route path="appointments" element={<DoctorAppointmentPage />} /> 
-                    <Route path="appointments/:id" element={<DoctorAppointmentDetailsPage />} /> 
-                    <Route path="patients" element={<Random />} />
-                    <Route path="doctors" element={<Random />} />
-
-                </Route>
-
-                <Route path="/patient" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} >
-                    <Route path="dashboard" element={<Random />} />
-                    <Route path="profile" element={<PatientProfilePage />} />
-                    <Route path="appointments" element={<PatientAppointmentPage />} /> 
-
-                </Route>
-                <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-        </BrowserRouter>
-    )
-}
+        <Route
+          path="/patient"
+          element={
+            <ProtectedRoute>
+              <PatientDashboard />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<Random />} />
+          <Route path="profile" element={<PatientProfilePage />} />
+          <Route path="appointments" element={<PatientAppointmentPage />} />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
 export default AppRoutes;

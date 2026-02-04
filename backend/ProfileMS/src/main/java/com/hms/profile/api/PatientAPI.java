@@ -1,5 +1,6 @@
 package com.hms.profile.api;
 
+import com.hms.profile.dto.DoctorDTO;
 import com.hms.profile.dto.DoctorDropdown;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,4 +46,14 @@ public class PatientAPI {
     public ResponseEntity<List<DoctorDropdown>> getDoctorsById(@RequestParam List<Long> ids) throws HmsException{
         return new ResponseEntity<>(patientService.getPatientsById(ids), HttpStatus.OK);
     }
+    @GetMapping("/getAll")
+    public ResponseEntity<List<PatientDTO>> getAllPatient() throws HmsException{
+        return new ResponseEntity<>(patientService.getAllPatients(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getProfileId/{id}")
+    public ResponseEntity<Long> getProfileId(@PathVariable Long id) throws HmsException {
+        return new ResponseEntity<>(patientService.getPatientById(id).getProfilePictureId(), HttpStatus.OK);
+    }
+
 }
