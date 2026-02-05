@@ -20,6 +20,7 @@ import AdminPatientPage from "../Pages/Admin/AdminPatientPage";
 import AdminDoctorPage from "../Pages/Admin/AdminDoctorPage";
 import AdminDashBoardPage from "../Pages/Admin/AdminDashBoardPage";
 import DoctorDashBoardPage from "../Pages/Doctor/DoctorDashBoardPage";
+import PatientDashBoardPage from "../Pages/Patient/PatientDashBoardPage";
 
 const AppRoutes = () => {
   return (
@@ -84,7 +85,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Random />} />
+          <Route path="dashboard" element={<PatientDashBoardPage />} />
           <Route path="profile" element={<PatientProfilePage />} />
           <Route path="appointments" element={<PatientAppointmentPage />} />
         </Route>

@@ -1,27 +1,20 @@
-import React from "react";
-import WelCome from "./WelCome";
-import Metrices from "./Metrices";
+import Visits from "./Visits";
 import DiseaseChart from "./DiseaseChart";
-import PatientMetrices from "./PatientMetrices";
-import Patient from "./Patient";
+import WelCome from "./WelCome";
 import Appointment from "./Appointment";
+import Medications from "./Medications";
 
 const DashBoard = () => {
   return (
     <div className="flex flex-col gap-5 mt-3">
       <div className="grid grid-cols-2 gap-2 ">
         <WelCome />
-        <Metrices />
+        <Visits />
       </div>
       <div className="grid grid-cols-3 gap-2">
         <DiseaseChart />
-        <div className="col-span-2">
-          <PatientMetrices />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-5">
-       <Patient/>
-       <Appointment/>
+        <Appointment />
+        <Medications />
       </div>
     </div>
   );

@@ -28,17 +28,17 @@ const WelCome = () => {
         <div>
           <div>Welcome Back</div>
           <div className="font-semibold text-xl text-blue-600">{user.name}</div>
-          <div className="text-sm">Surgery,Cardiology</div>
+          <div className="text-sm">A+,India</div>
         </div>
         <Avatar src={url} variant="filled" alt="it's me" size={100} />
       </div>
       <div className="gap-5 flex">
         <div className="p-3 rounded-xl bg-violet-200">
-          <div className=" text-sm">Appointments</div>
+          <div className=" text-sm">Visits</div>
           <div className="font-semibold text-lg text-violet-700">120+</div>
         </div>
         <div className="p-3 rounded-xl bg-orange-200">
-          <div className=" text-sm">Patients</div>
+          <div className=" text-sm">Medications</div>
           <div className="font-semibold text-lg text-orange-700">120+</div>
         </div>
       </div>
