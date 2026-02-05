@@ -11,7 +11,6 @@ import { PrimeReactProvider } from "primereact/api";
 import { ModalsProvider } from "@mantine/modals";
 import "@mantine/spotlight/styles.css";
 import "@mantine/dropzone/styles.css";
-import "@mantine/charts/styles.css";
 const theme = createTheme({
   focusRing: "never",
   fontFamily: "Poppins, sans-serif",

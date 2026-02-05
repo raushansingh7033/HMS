@@ -19,6 +19,7 @@ import AdminSalesPage from "../Pages/Admin/AdminSalesPage";
 import AdminPatientPage from "../Pages/Admin/AdminPatientPage";
 import AdminDoctorPage from "../Pages/Admin/AdminDoctorPage";
 import AdminDashBoardPage from "../Pages/Admin/AdminDashBoardPage";
+import DoctorDashBoardPage from "../Pages/Doctor/DoctorDashBoardPage";
 
 const AppRoutes = () => {
   return (
@@ -63,7 +64,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Random />} />
+          <Route path="dashboard" element={<DoctorDashBoardPage />} />
           <Route path="profile" element={<DoctorProfilePage />} />
           <Route path="pharmacy" element={<Random />} />
           <Route path="appointments" element={<DoctorAppointmentPage />} />
