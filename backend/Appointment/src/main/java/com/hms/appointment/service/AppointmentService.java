@@ -2,8 +2,11 @@ package com.hms.appointment.service;
 
 import com.hms.appointment.dto.AppointmentDTO;
 import com.hms.appointment.dto.AppointmentDetails;
+import com.hms.appointment.dto.MonthlyVisitDTO;
+import com.hms.appointment.dto.ReasonCountDTO;
 import com.hms.appointment.exception.HmsException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface AppointmentService {
@@ -23,4 +26,17 @@ public interface AppointmentService {
 
     List<AppointmentDetails> getAllAppointmentsByDoctorId(Long doctorId) throws HmsException;
 
+    List<MonthlyVisitDTO> getAppointmentCountByPatient(Long patientId) throws HmsException;
+
+    List<MonthlyVisitDTO> getAppointmentCountByDoctor(Long doctorId) throws HmsException;
+
+    List<MonthlyVisitDTO> getAppointmentCounts() throws HmsException;
+
+    List<ReasonCountDTO> getReasonCountByPatient(Long patientId) throws HmsException;
+
+    List<ReasonCountDTO> getReasonCountByDoctor(Long doctorId);
+
+    List<ReasonCountDTO> getReasons() throws HmsException;
+
+    List<AppointmentDetails> getTodayAppointments() throws HmsException;
 }

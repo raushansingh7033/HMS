@@ -2,6 +2,7 @@ package com.hms.appointment.service;
 
 import com.hms.appointment.client.ProfileClient;
 import com.hms.appointment.dto.DoctorName;
+import com.hms.appointment.dto.MedicineDTO;
 import com.hms.appointment.dto.PrescriptionDTO;
 import com.hms.appointment.dto.PrescriptionDetails;
 import com.hms.appointment.entity.Prescription;
@@ -117,5 +118,11 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         });
         return prescriptionDetails;
+    }
+
+    @Override
+    public List<MedicineDTO> getMedicinesByPatientId(Long patientId) throws HmsException {
+        List<Long> preIds=prescriptionRepository.findAllPreIdsByPatient(patientId);
+        return medicineService.getMedicinesByPrescriptionIds(preIds);
     }
 }
